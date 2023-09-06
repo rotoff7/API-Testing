@@ -1,26 +1,17 @@
 package apiTest;
 
 import apiTest.JdbcFolder.JDBC;
-import io.qameta.allure.Step;
 import io.restassured.http.ContentType;
-import io.restassured.http.Cookie;
 import io.restassured.response.Response;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import io.restassured.RestAssured;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 
-import javax.net.ssl.SSLPeerUnverifiedException;
 
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
-import static io.restassured.RestAssured.sessionId;
 import static org.hamcrest.Matchers.*;
 
 public class RestApiTest {
@@ -41,8 +32,7 @@ public class RestApiTest {
     void addingGood() {
         addGood();
         checkAddedGood(session);
-        deleteRow(productName,productType);
-        checkAddedGood(session);
+        JDBC.deleteRow(productName, productType);
     }
 
     void getPage() {
@@ -55,6 +45,7 @@ public class RestApiTest {
                 .get()
                 .then();
     }
+
     void checkTable() {
         SpecFile.installSpecification(SpecFile.requestSpecification("http://localhost:8080/api"),
                 SpecFile.responseSpecification(200));
@@ -65,7 +56,11 @@ public class RestApiTest {
         response.then()
                 .log().all()
                 .body(Matchers.not(Matchers.empty()))
-                .body("table.size()", equalTo(4));
+                .body("table.size()", equalTo(4))
+                .assertThat()
+                .body("[0]", hasKey("name"))
+                .body("[0]", hasKey("type"))
+                .body("[0]", hasKey("exotic"));
     }
 
     void addGood() {
@@ -95,32 +90,16 @@ public class RestApiTest {
                 .basePath("/food")
                 .sessionId(session)
                 .when()
-                .get() //?
+                .get()
                 .then()
+                .assertThat()
+                .body("[4]", hasValue(productName))
+                .body("[4]", hasValue(productType))
+                .body("[4]", hasValue(true))
                 .log().all()
+                // Изначальный вариант:
                 .extract()
                 .jsonPath().getList("name");
-        Assertions.assertEquals(productName, list.get(list.size()-1), "Product was not found");
-    }
-
-    void deleteRow(String pName, String pType){
-        JDBC.deleteRow(pName, pType);
-    }
-
-    void pageElementsCheck() {
-        SpecFile.installSpecification(SpecFile.requestSpecification("http://localhost:8080"),
-                SpecFile.responseSpecification(200));
-        Response response = given()
-                .basePath("/food")
-                .when()
-                .get();
-        response.then()
-                .log().all();
-//                .body(hasXPath("//h5[text()='Список товаров']"));
-//                .body(hasXPath("//th[text()='#']"));
-//                .body(hasXPath("//th[text()='Наименование']"))
-//                .body(hasXPath("//th[text()='Тип']"))
-//                .body(hasXPath("//th[text()='Экзотический']"))
-//                .body(hasXPath("//button[text()='Добавить']"));
+        Assertions.assertEquals(productName, list.get(list.size() - 1), "Product was not found");
     }
 }
