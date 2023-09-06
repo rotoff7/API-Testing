@@ -5,11 +5,15 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import org.h2.engine.Session;
 
 public class SpecFile {
+
+    static String sessionId;
     public static RequestSpecification requestSpecification(String url) {
         return new RequestSpecBuilder()
                 .setBaseUri(url)
+//                .setSessionId()
                 .build();
     }
 
@@ -23,4 +27,5 @@ public class SpecFile {
         RestAssured.requestSpecification = requestSpecification;
         RestAssured.responseSpecification = responseSpecification;
     }
+
 }

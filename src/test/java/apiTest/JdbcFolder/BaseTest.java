@@ -11,7 +11,6 @@ import java.sql.SQLException;
 public class BaseTest {
     protected static Connection connection;
 
-    @BeforeAll
     static void connect() {
         DataSource source = getDataSource();
         try {
@@ -21,7 +20,6 @@ public class BaseTest {
         }
     }
 
-    @AfterAll
     static void connectClose() {
         try {
             connection.close();
