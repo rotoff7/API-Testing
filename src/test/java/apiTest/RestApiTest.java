@@ -19,6 +19,7 @@ public class RestApiTest {
     private static String session;
     private static String productName = "NewFruitTest";
     private static String productType = "FRUIT";
+    private static int productExotic = 1;
 
     @Test
     @DisplayName("Отображение страницы 'Список товаров'")
@@ -32,6 +33,7 @@ public class RestApiTest {
     void addingGood() {
         addGood();
         checkAddedGood(session);
+        JDBC.checkDB(productName, productType, productExotic);
         JDBC.deleteRow(productName, productType);
     }
 

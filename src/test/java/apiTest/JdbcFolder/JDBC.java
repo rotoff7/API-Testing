@@ -23,4 +23,25 @@ public class JDBC extends BaseTest {
         }
     }
 
+    public static void checkDB(String name, String type, int exotic) {
+        BaseTest.connect();
+        String sqlSelect = ("SELECT * FROM food WHERE food_name = ? AND food_type = ?;");
+        try (PreparedStatement ps = connection.prepareStatement(sqlSelect)) {
+            ps.setString(1, name);
+            ps.setString(2, type);
+            try (ResultSet resultSet = ps.executeQuery()){
+                resultSet.last();
+                String productName = resultSet.getString("food_name");
+                String ProductType = resultSet.getString("food_type");
+                int productExotic = resultSet.getInt("food_exotic");
+                Assertions.assertEquals(name, productName, "Wrong name");
+                Assertions.assertEquals(type, ProductType, "Wrong type");
+                Assertions.assertEquals(exotic, productExotic, "Wrong exotic type");
+                BaseTest.connectClose();
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
 }
